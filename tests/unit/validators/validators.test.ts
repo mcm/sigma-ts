@@ -76,6 +76,14 @@ describe('IdentifierUniquenessValidator', () => {
     const issues = new IdentifierUniquenessValidator().validate(collection.get(0), collection)
     expect(issues.length).toBeGreaterThan(0)
   })
+
+  it('reuses index cache across multiple calls on same instance', () => {
+    const collection = SigmaCollection.fromYAMLList([GOOD_RULE_YAML, GOOD_RULE_YAML])
+    const validator = new IdentifierUniquenessValidator()
+    validator.validate(collection.get(0), collection) // builds cache
+    const issues = validator.validate(collection.get(1), collection) // reuses cache
+    expect(issues.length).toBeGreaterThan(0)
+  })
 })
 
 describe('TitleLengthValidator', () => {
@@ -435,6 +443,14 @@ describe('DuplicateTitleValidator', () => {
   it('passes without a collection', () => {
     expect(new DuplicateTitleValidator().validate(good)).toHaveLength(0)
   })
+
+  it('reuses index cache across multiple calls on same instance', () => {
+    const collection = SigmaCollection.fromYAMLList([GOOD_RULE_YAML, GOOD_RULE_YAML])
+    const validator = new DuplicateTitleValidator()
+    validator.validate(collection.get(0), collection) // builds cache
+    const issues = validator.validate(collection.get(1), collection) // reuses cache
+    expect(issues).toHaveLength(1)
+  })
 })
 
 describe('DuplicateFilenameValidator', () => {
@@ -461,6 +477,16 @@ describe('DuplicateFilenameValidator', () => {
     const b = good._clone({ customAttributes: new Map([['filename', 'b.yml']]) })
     const collection = new SigmaCollection([a, b])
     expect(new DuplicateFilenameValidator().validate(a, collection)).toHaveLength(0)
+  })
+
+  it('reuses index cache across multiple calls on same instance', () => {
+    const a = good._clone({ customAttributes: new Map([['filename', 'rule.yml']]) })
+    const b = good._clone({ customAttributes: new Map([['filename', 'rule.yml']]) })
+    const collection = new SigmaCollection([a, b])
+    const validator = new DuplicateFilenameValidator()
+    validator.validate(a, collection) // builds cache
+    const issues = validator.validate(b, collection) // reuses cache
+    expect(issues).toHaveLength(1)
   })
 })
 

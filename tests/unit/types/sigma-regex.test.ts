@@ -22,4 +22,25 @@ describe('SigmaRegularExpression', () => {
     expect(new SigmaRegularExpression('abc').equals(new SigmaRegularExpression('abc'))).toBe(true)
     expect(new SigmaRegularExpression('abc').equals(new SigmaRegularExpression('def'))).toBe(false)
   })
+
+  it('toString returns the original pattern', () => {
+    expect(new SigmaRegularExpression('foo.*bar').toString()).toBe('foo.*bar')
+  })
+
+  it('throws SigmaTypeError for patterns exceeding MAX_PATTERN_LENGTH', () => {
+    const longPattern = 'a'.repeat(SigmaRegularExpression.MAX_PATTERN_LENGTH + 1)
+    expect(() => new SigmaRegularExpression(longPattern)).toThrow(SigmaTypeError)
+  })
+
+  it('handles (?i) inline flag — compiles case-insensitively', () => {
+    const r = new SigmaRegularExpression('(?i)hello')
+    expect(r.regexp.flags).toContain('i')
+    expect(r.regexp.test('HELLO')).toBe(true)
+  })
+
+  it('handles (?ms) inline flags', () => {
+    const r = new SigmaRegularExpression('(?ms)^foo')
+    expect(r.regexp.flags).toContain('m')
+    expect(r.regexp.flags).toContain('s')
+  })
 })

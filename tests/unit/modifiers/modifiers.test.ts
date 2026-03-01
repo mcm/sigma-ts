@@ -89,6 +89,19 @@ describe('ReModifier', () => {
   })
 })
 
+describe('CaseInsensitiveModifier', () => {
+  it('adds i flag to SigmaRegularExpression', () => {
+    const { values } = applyModifierChain(['re', 'i'], [SigmaString.plain('foo.*bar')])
+    expect(values[0]).toBeInstanceOf(SigmaRegularExpression)
+    expect((values[0] as SigmaRegularExpression).regexp.flags).toContain('i')
+  })
+
+  it('passes non-SigmaRegularExpression values through unchanged', () => {
+    const { values } = applyModifierChain(['i'], [SigmaNull.instance])
+    expect(values[0]).toBe(SigmaNull.instance)
+  })
+})
+
 describe('CidrModifier', () => {
   it('converts SigmaString to SigmaCIDRExpression', () => {
     const { values } = applyModifierChain(['cidr'], [SigmaString.plain('192.168.1.0/24')])

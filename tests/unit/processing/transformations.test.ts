@@ -898,6 +898,35 @@ transformations:
     expect(() => PP.fromYAML(pipelineYaml)).toThrow('Unknown pipeline condition type: "unknown_condition_type"')
   })
 
+  it('throws when rule_contains_detection_item has sub_conditions', async () => {
+    const pipelineYaml = `
+transformations:
+  - type: set_custom_attribute
+    key: test
+    value: true
+    rule_conditions:
+      - type: rule_contains_detection_item
+        sub_conditions:
+          - type: detection_item_field_name
+            pattern: CommandLine
+`
+    const { ProcessingPipeline: PP } = await import('../../../src/processing/index.ts')
+    expect(() => PP.fromYAML(pipelineYaml)).toThrow('sub_conditions')
+  })
+
+  it('throws when detection_item_value is used from YAML', async () => {
+    const pipelineYaml = `
+transformations:
+  - type: set_custom_attribute
+    key: test
+    value: true
+    detection_item_conditions:
+      - type: detection_item_value
+`
+    const { ProcessingPipeline: PP } = await import('../../../src/processing/index.ts')
+    expect(() => PP.fromYAML(pipelineYaml)).toThrow('detection_item_value')
+  })
+
   it('covers factory default branches (missing config keys)', async () => {
     // Exercise all condition factories with missing keys to cover ternary "false" branches
     const pipelineYaml = `
