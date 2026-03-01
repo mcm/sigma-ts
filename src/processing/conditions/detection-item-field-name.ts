@@ -2,12 +2,7 @@ import type { SigmaRule } from '../../rule.js'
 import type { SigmaDetectionItem } from '../../detection.js'
 import { ProcessingCondition } from './base.js'
 import type { PipelineState } from './base.js'
-
-function globMatch(pattern: string, value: string): boolean {
-  const regexStr =
-    '^' + pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$'
-  return new RegExp(regexStr).test(value)
-}
+import { globMatch } from '../../glob.js'
 
 export class DetectionItemFieldNameCondition extends ProcessingCondition {
   constructor(private readonly pattern: string) {

@@ -876,20 +876,16 @@ transformations:
     expect(processed.customAttributes.get('step1_applied')).toBe(true)
   })
 
-  it('handles fromYAML with invalid transformation type (no-op fallback)', async () => {
+  it('throws SigmaPipelineParseError for unknown transformation type', async () => {
     const pipelineYaml = `
 transformations:
   - type: unknown_transformation_xyz
 `
     const { ProcessingPipeline: PP } = await import('../../../src/processing/index.ts')
-    const pipeline = PP.fromYAML(pipelineYaml)
-    const rule = SigmaRule.fromYAML(BASE_YAML)
-    // Should not throw — unknown types are silently no-op
-    const processed = pipeline.apply(rule)
-    expect(processed.title).toBe('Test Rule')
+    expect(() => PP.fromYAML(pipelineYaml)).toThrow('Unknown transformation type: "unknown_transformation_xyz"')
   })
 
-  it('handles fromYAML with invalid condition type (silently skip)', async () => {
+  it('throws SigmaPipelineParseError for unknown condition type', async () => {
     const pipelineYaml = `
 transformations:
   - type: set_custom_attribute
@@ -899,11 +895,7 @@ transformations:
       - type: unknown_condition_type
 `
     const { ProcessingPipeline: PP } = await import('../../../src/processing/index.ts')
-    const pipeline = PP.fromYAML(pipelineYaml)
-    const rule = SigmaRule.fromYAML(BASE_YAML)
-    const processed = pipeline.apply(rule)
-    // Unknown condition is skipped → transformation still applies
-    expect(processed.customAttributes.get('test')).toBe(true)
+    expect(() => PP.fromYAML(pipelineYaml)).toThrow('Unknown pipeline condition type: "unknown_condition_type"')
   })
 
   it('covers factory default branches (missing config keys)', async () => {

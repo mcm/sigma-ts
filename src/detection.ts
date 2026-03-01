@@ -8,27 +8,22 @@ import {
 import type { SigmaType } from './types/index.js'
 import { applyModifierChain } from './modifiers/index.js'
 
-type ComparisonOperator = 'lt' | 'lte' | 'gt' | 'gte'
-
 export class SigmaDetectionItem {
   readonly field: string | null
   readonly value: readonly SigmaType[]
   readonly modifiers: readonly string[]
   readonly valueLinking: 'OR' | 'AND'
-  readonly comparison: ComparisonOperator | null
 
   constructor(params: {
     field: string | null
     value: readonly SigmaType[]
     modifiers?: readonly string[]
     valueLinking?: 'OR' | 'AND'
-    comparison?: ComparisonOperator | null
   }) {
     this.field = params.field
     this.value = params.value
     this.modifiers = params.modifiers ?? []
     this.valueLinking = params.valueLinking ?? 'OR'
-    this.comparison = params.comparison ?? null
   }
 
   get isKeyword(): boolean {
@@ -44,22 +39,12 @@ export class SigmaDetectionItem {
     modifiers?: readonly string[]
     valueLinking?: 'OR' | 'AND'
   } = {}): SigmaDetectionItem {
-    const params: {
-      field: string | null
-      value: readonly SigmaType[]
-      modifiers?: readonly string[]
-      valueLinking?: 'OR' | 'AND'
-      comparison?: ComparisonOperator
-    } = {
+    return new SigmaDetectionItem({
       field: overrides.field !== undefined ? overrides.field : this.field,
       value: overrides.value ?? this.value,
       modifiers: overrides.modifiers ?? this.modifiers,
       valueLinking: overrides.valueLinking ?? this.valueLinking,
-    }
-    if (this.comparison !== null) {
-      params.comparison = this.comparison
-    }
-    return new SigmaDetectionItem(params)
+    })
   }
 
   /**
@@ -80,12 +65,6 @@ export class SigmaDetectionItem {
     // Normalize raw values to SigmaType[]
     let baseValues: SigmaType[] = normalizeValues(rawValue, usePlainStrings)
 
-    // Detect comparison modifier
-    const comparisonModifiers: ComparisonOperator[] = ['lt', 'lte', 'gt', 'gte']
-    const comparison = modifierNames.find((m) =>
-      comparisonModifiers.includes(m as ComparisonOperator),
-    ) as ComparisonOperator | undefined
-
     // Apply modifier chain
     let valueLinking: 'OR' | 'AND' = 'OR'
     try {
@@ -104,7 +83,6 @@ export class SigmaDetectionItem {
       value: baseValues,
       modifiers: modifierNames,
       valueLinking,
-      comparison: comparison ?? null,
     })
   }
 
@@ -118,7 +96,6 @@ export class SigmaDetectionItem {
       value: values,
       modifiers: [],
       valueLinking: 'OR',
-      comparison: null,
     })
   }
 }

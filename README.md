@@ -374,6 +374,20 @@ registerPipeline('my-siem', new ProcessingPipeline({
 }))
 ```
 
+## Security considerations
+
+### Regex patterns
+
+`SigmaRegularExpression` (used by the `|re` modifier) and `ReplaceStringTransformation` both compile user-supplied regex patterns using the JavaScript engine. A length limit of 2,000 characters is enforced to reduce exposure, but length alone does not prevent catastrophic backtracking (ReDoS). Short patterns such as `(a+)+b` can still cause exponential backtracking on adversarial input.
+
+**Recommendation**: this library is designed to process rules from trusted sources (your own rule repository, SigmaHQ). If you are ingesting rules from untrusted third parties, consider running the parser in a worker with a timeout, or adding a regex complexity check (e.g. [safe-regex](https://github.com/nicolo-ribaudo/safe-regex2)) in your pipeline before passing rules to backends.
+
+### Filesystem ingestion
+
+`loadRulesFromDirectory` reads all matching files in a directory recursively with no cap on file count, individual file size, or total memory usage. On a well-managed rule repository this is fine. In contexts where the directory path or contents are user-controlled, a malicious actor could cause resource exhaustion by providing a directory containing many large files.
+
+**Recommendation**: if the ingestion path is not fully trusted, enforce limits at the call site — for example, check `collection.rules.length` after loading, or pre-filter the directory listing before calling the loader.
+
 ## License
 
 MIT

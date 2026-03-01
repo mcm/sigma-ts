@@ -2,6 +2,7 @@ import { SigmaConditionError } from './exceptions.js'
 import { SigmaAggregationExpression as SigmaAggExpr } from './aggregation.js'
 import type { AggregationFunction, ComparisonOperator } from './aggregation.js'
 import type { SigmaAggregationExpression } from './aggregation.js'
+import { globToRegex } from './glob.js'
 
 /** Build error options, omitting token if undefined (required by exactOptionalPropertyTypes). */
 function errOpts(token: string | undefined): { token?: string } {
@@ -367,10 +368,10 @@ class Parser {
 
 /**
  * Match a glob pattern (with * wildcard) against a set of names.
+ * Detection identifier matching is case-insensitive per the Sigma spec.
  */
 export function matchPattern(pattern: string, names: ReadonlySet<string>): string[] {
-  const regexStr = '^' + pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$'
-  const regex = new RegExp(regexStr, 'i')
+  const regex = globToRegex(pattern, /* caseInsensitive */ true)
   return [...names].filter(name => regex.test(name))
 }
 

@@ -7,7 +7,6 @@ import { RuleContainsFieldCondition } from './conditions/rule-contains-field.js'
 import { RuleProcessingItemAppliedCondition } from './conditions/rule-processing-item-applied.js'
 import { RuleProcessingStateCondition } from './conditions/rule-processing-state.js'
 import { DetectionItemFieldNameCondition } from './conditions/detection-item-field-name.js'
-import { DetectionItemValueCondition } from './conditions/detection-item-value.js'
 import { DetectionItemModifierCondition } from './conditions/detection-item-modifier.js'
 import { DetectionItemProcessingItemAppliedCondition } from './conditions/detection-item-processing-item-applied.js'
 import { DetectionItemProcessingStateCondition } from './conditions/detection-item-processing-state.js'
@@ -78,8 +77,12 @@ registerPipelineCondition('rule_tag', (config) =>
 )
 
 registerPipelineCondition('rule_contains_detection_item', (config) => {
-  // sub_conditions is an array of condition configs — not supported at this level, use empty list
-  void config
+  const sub = config['sub_conditions']
+  if (Array.isArray(sub) && sub.length > 0) {
+    throw new Error(
+      '"sub_conditions" on rule_contains_detection_item is not yet supported — omit it to match any rule that contains at least one detection item',
+    )
+  }
   return new RuleContainsDetectionItemCondition([])
 })
 
@@ -108,12 +111,11 @@ registerPipelineCondition('detection_item_field_name', (config) =>
   ),
 )
 
-registerPipelineCondition(
-  'detection_item_value',
-  // DetectionItemValueCondition takes a predicate; a no-op is registered for
-  // YAML deserialization — callers can replace the predicate at runtime.
-  (_config) => new DetectionItemValueCondition(() => false),
-)
+registerPipelineCondition('detection_item_value', (_config) => {
+  throw new Error(
+    '"detection_item_value" condition is not supported via YAML pipelines — construct DetectionItemValueCondition programmatically with a custom predicate',
+  )
+})
 
 registerPipelineCondition('detection_item_modifier', (config) =>
   new DetectionItemModifierCondition(

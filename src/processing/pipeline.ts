@@ -7,23 +7,10 @@ import { ProcessingTransformation } from './transformations/base.js'
 import type { SigmaDetectionItem } from '../detection.js'
 import { getPipelineCondition } from './conditions/registry.js'
 
-/** No-op transformation placeholder used during YAML deserialization in Story 10.
- * Full transformation deserialization is implemented in Story 11. */
-class NoOpTransformation extends ProcessingTransformation {
-  applyToRule(rule: SigmaRule, _state: MutablePipelineState): SigmaRule {
-    return rule
-  }
-  applyToDetectionItem(
-    item: SigmaDetectionItem,
-    _state: MutablePipelineState,
-  ): SigmaDetectionItem[] {
-    return [item]
-  }
-}
 
 /**
  * Parse an array of raw condition config objects from YAML using the condition registry.
- * Non-conforming entries are silently skipped.
+ * Throws SigmaPipelineParseError for missing or unknown condition types.
  */
 function parseConditionList(raw: unknown): ProcessingCondition[] {
   if (!Array.isArray(raw)) return []
@@ -32,13 +19,11 @@ function parseConditionList(raw: unknown): ProcessingCondition[] {
     if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) continue
     const cfg = entry as Record<string, unknown>
     const typeName = typeof cfg['type'] === 'string' ? cfg['type'] : undefined
-    if (typeName === undefined) continue
-    try {
-      const factory = getPipelineCondition(typeName)
-      conditions.push(factory(cfg))
-    } catch {
-      // Unknown condition type — skip rather than hard-fail
+    if (typeName === undefined) {
+      throw new SigmaPipelineParseError('Pipeline condition entry is missing required "type" field')
     }
+    const factory = getPipelineCondition(typeName)
+    conditions.push(factory(cfg))
   }
   return conditions
 }
@@ -139,19 +124,15 @@ export class ProcessingPipeline {
         const ruleConditions = parseConditionList(itemDict['rule_conditions'])
         const detectionItemConditions = parseConditionList(itemDict['detection_item_conditions'])
 
-        // Try to deserialize the transformation from the registry; fall back to no-op.
-        let transformation: ProcessingTransformation = new NoOpTransformation()
         const typeName = typeof itemDict['type'] === 'string' ? itemDict['type'] : undefined
-        if (typeName !== undefined) {
-          const factory = transformationRegistry.get(typeName)
-          if (factory !== undefined) {
-            try {
-              transformation = factory(itemDict)
-            } catch {
-              // Keep no-op on error
-            }
-          }
+        if (typeName === undefined) {
+          throw new SigmaPipelineParseError('Pipeline transformation entry is missing required "type" field')
         }
+        const factory = transformationRegistry.get(typeName)
+        if (factory === undefined) {
+          throw new SigmaPipelineParseError(`Unknown transformation type: "${typeName}"`)
+        }
+        const transformation = factory(itemDict)
 
         const item = new ProcessingItem({
           ...(itemId !== undefined ? { id: itemId } : {}),
