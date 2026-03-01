@@ -1,0 +1,24 @@
+title: AWS Root Account Login
+id: e8ab6c4d-1f3e-3e4a-cf2b-b6c1d2e3f4a5
+status: stable
+description: Detects AWS root account login events which should rarely occur
+references:
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html
+author: Cloud Security
+date: 2023-12-01
+tags:
+  - attack.initial_access
+  - attack.t1078.004
+logsource:
+  product: aws
+  service: cloudtrail
+detection:
+  selection:
+    eventName: ConsoleLogin
+    userIdentity.type: Root
+  filter:
+    errorCode: 'Failed authentication'
+  condition: selection and not filter
+falsepositives:
+  - Legitimate emergency root account access
+level: high

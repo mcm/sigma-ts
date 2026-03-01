@@ -1,0 +1,26 @@
+title: LSASS Memory Dump via ProcDump
+id: c2ef0a8b-5d7c-7c8e-ad6f-f0a5b6c7d8e9
+status: test
+description: Detects use of ProcDump to dump LSASS memory for credential extraction
+references:
+  - https://attack.mitre.org/techniques/T1003/001/
+author: Memory Defense
+date: 2024-02-14
+tags:
+  - attack.credential_access
+  - attack.t1003.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_tool:
+    Image|endswith: '\procdump.exe'
+    CommandLine|contains: 'lsass'
+  selection_generic:
+    CommandLine|contains|all:
+      - '-ma'
+      - 'lsass'
+  condition: 1 of selection_*
+falsepositives:
+  - Legitimate diagnostic dumps by support staff
+level: high

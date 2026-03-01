@@ -1,0 +1,22 @@
+title: GCP Admin Activity from Unusual Location
+id: b3de1f9a-6c8b-8b9d-fc7e-e1f6a7b8c9d0
+status: experimental
+description: Detects GCP admin activity from unexpected geographic locations
+author: Cloud Security Team
+date: 2024-04-25
+tags:
+  - attack.initial_access
+  - attack.t1078.004
+logsource:
+  product: gcp
+  service: gcp.audit
+detection:
+  selection:
+    gcp.audit.method_name|startswith:
+      - 'v1.compute'
+      - 'v1.container'
+    gcp.audit.authentication_info.principal_email|endswith: '@example.com'
+  condition: selection
+falsepositives:
+  - Remote administration from trusted locations
+level: low

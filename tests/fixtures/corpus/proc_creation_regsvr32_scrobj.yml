@@ -1,0 +1,26 @@
+title: Regsvr32 Loading SCT Script
+id: f9bc7d5e-2a4f-4f5b-da3c-c7d2e3f4a5b6
+status: test
+description: Detects regsvr32.exe loading a remote scriptlet (Squiblydoo technique)
+references:
+  - https://attack.mitre.org/techniques/T1218/010/
+author: Living Off The Land
+date: 2024-01-25
+tags:
+  - attack.defense_evasion
+  - attack.t1218.010
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith: '\regsvr32.exe'
+  selection_args:
+    CommandLine|contains|all:
+      - '/s'
+      - '/u'
+      - '/i:'
+  condition: selection_image and selection_args
+falsepositives:
+  - Legitimate COM registration with these flags
+level: high

@@ -1,0 +1,24 @@
+title: Suspicious User Agent in Web Logs
+id: b5de3f1a-8c0b-0b1d-fc9e-e3f8a9b0c1d2
+status: experimental
+description: Detects known malicious or suspicious user agent strings in web server logs
+author: Web Security
+date: 2024-02-20
+tags:
+  - attack.initial_access
+  - attack.t1190
+logsource:
+  category: webserver
+detection:
+  selection:
+    cs-user-agent|contains:
+      - 'sqlmap'
+      - 'nikto'
+      - 'nessus'
+      - 'masscan'
+      - 'dirbuster'
+      - 'gobuster'
+  condition: selection
+falsepositives:
+  - Authorized penetration testing
+level: medium

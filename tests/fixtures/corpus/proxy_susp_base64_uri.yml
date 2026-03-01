@@ -1,0 +1,21 @@
+title: Base64 Encoded Content in URI
+id: f5bc3d1e-8a0f-0f1b-da9c-c3d8e9f0a1b2
+status: experimental
+description: Detects base64-encoded content in HTTP URIs which may indicate data exfiltration or C2 communication
+author: Proxy Monitor
+date: 2024-04-10
+tags:
+  - attack.exfiltration
+  - attack.t1048
+logsource:
+  category: proxy
+detection:
+  selection:
+    cs-uri-query|base64|contains:
+      - 'powershell'
+      - 'cmd.exe'
+      - 'whoami'
+  condition: selection
+falsepositives:
+  - Legitimate applications using base64 in URLs
+level: low

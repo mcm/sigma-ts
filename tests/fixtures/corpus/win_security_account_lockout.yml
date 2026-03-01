@@ -1,0 +1,22 @@
+title: Multiple Account Lockouts
+id: a6cd4e2f-9b1a-1a2c-eb0d-d4e9f0a1b2c3
+status: stable
+description: Detects multiple account lockout events that may indicate password spraying
+references:
+  - https://attack.mitre.org/techniques/T1110/003/
+author: Identity Monitor
+date: 2023-07-12
+tags:
+  - attack.credential_access
+  - attack.t1110.003
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4740
+  condition: selection
+falsepositives:
+  - User forgetting password
+  - Application misconfiguration
+level: medium

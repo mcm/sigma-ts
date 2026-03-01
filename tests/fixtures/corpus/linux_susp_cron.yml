@@ -1,0 +1,25 @@
+title: Suspicious Cron Job Created
+id: d7fa5b3c-0e2d-2d3f-be1a-a5b0c1d2e3f4
+status: experimental
+description: Detects creation of cron jobs that may indicate persistence
+author: Linux Security
+date: 2024-03-20
+tags:
+  - attack.persistence
+  - attack.t1053.003
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection:
+    CommandLine|contains:
+      - 'crontab -e'
+      - '/etc/cron.d/'
+      - '/var/spool/cron/'
+  filter_admin:
+    User: root
+    CommandLine|contains: 'system'
+  condition: selection and not filter_admin
+falsepositives:
+  - Legitimate scheduled tasks
+level: low

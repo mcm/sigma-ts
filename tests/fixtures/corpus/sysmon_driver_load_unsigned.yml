@@ -1,0 +1,27 @@
+title: Unsigned Driver Loaded
+id: f1bc9d7e-4a6f-6f7b-da5c-c9d4e5f6a7b8
+status: experimental
+description: Detects loading of unsigned or suspicious kernel drivers
+references:
+  - https://attack.mitre.org/techniques/T1014/
+author: Kernel Monitor
+date: 2024-03-30
+tags:
+  - attack.defense_evasion
+  - attack.t1014
+  - attack.t1543.003
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 6
+    Signed: 'false'
+  filter_common:
+    ImageLoaded|startswith:
+      - 'C:\Windows\System32\drivers\'
+      - 'C:\Windows\SysWOW64\drivers\'
+  condition: selection and not filter_common
+falsepositives:
+  - Third-party kernel drivers from legitimate software
+level: medium

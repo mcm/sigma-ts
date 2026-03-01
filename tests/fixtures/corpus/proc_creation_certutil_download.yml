@@ -1,0 +1,27 @@
+title: CertUtil Used for File Download
+id: e0ab8c6d-3f5e-5e6a-cf4b-b8c3d4e5f6a7
+status: test
+description: Detects CertUtil being used to download files, a common LOLBin technique
+references:
+  - https://attack.mitre.org/techniques/T1105/
+author: LOLBin Hunter
+date: 2024-01-10
+tags:
+  - attack.command_and_control
+  - attack.t1105
+  - attack.defense_evasion
+  - attack.t1218
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\certutil.exe'
+    CommandLine|contains:
+      - '-urlcache'
+      - '-verifyctl'
+      - '-decode'
+  condition: selection
+falsepositives:
+  - Certificate management operations
+level: medium

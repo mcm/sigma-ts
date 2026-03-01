@@ -1,0 +1,29 @@
+title: Suspicious Outbound Network Connection
+id: b8de7f5a-2c4b-4b5d-9c3e-e7f2a3b4c5d6
+status: experimental
+description: Detects processes making outbound connections on uncommon ports
+author: Security Team
+date: 2024-02-10
+tags:
+  - attack.command_and_control
+  - attack.t1071.001
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    Initiated: 'true'
+    DestinationPort:
+      - 4444
+      - 8080
+      - 9090
+  filter_browsers:
+    Image|endswith:
+      - '\chrome.exe'
+      - '\firefox.exe'
+      - '\msedge.exe'
+  condition: selection and not filter_browsers
+falsepositives:
+  - Development environments
+  - VPN clients
+level: low

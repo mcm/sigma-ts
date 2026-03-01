@@ -1,0 +1,24 @@
+title: Windows Firewall Disabled via CLI
+id: d3fa1b9c-6e8d-8d9f-be7a-a1b6c7d8e9f0
+status: stable
+description: Detects disabling of Windows Firewall through netsh command
+author: Defense Evasion Hunter
+date: 2023-08-20
+tags:
+  - attack.defense_evasion
+  - attack.t1562.004
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_netsh:
+    Image|endswith: '\netsh.exe'
+    CommandLine|contains|all:
+      - 'firewall'
+      - 'set'
+      - 'state'
+      - 'off'
+  condition: selection_netsh
+falsepositives:
+  - Legitimate administrative firewall changes
+level: medium

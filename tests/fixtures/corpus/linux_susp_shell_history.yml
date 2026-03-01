@@ -1,0 +1,27 @@
+title: Shell History File Deletion or Manipulation
+id: c8ef6a4b-1d3c-3c4e-ad2f-f6a1b2c3d4e5
+status: experimental
+description: Detects attempts to clear or manipulate shell history files to cover tracks
+author: Linux Forensics
+date: 2024-02-28
+tags:
+  - attack.defense_evasion
+  - attack.t1070.003
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection_unset:
+    CommandLine|contains: 'HISTFILE='
+  selection_delete_history:
+    CommandLine|contains:
+      - '.bash_history'
+      - '.zsh_history'
+  selection_delete_cmd:
+    CommandLine|contains:
+      - 'truncate'
+      - 'shred'
+  condition: selection_unset or (selection_delete_history and selection_delete_cmd)
+falsepositives:
+  - Legitimate privacy controls
+level: low

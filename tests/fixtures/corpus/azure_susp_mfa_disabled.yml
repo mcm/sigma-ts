@@ -1,0 +1,24 @@
+title: Azure MFA Disabled for User
+id: d9fa7b5c-2e4d-4d5f-be3a-a7b2c3d4e5f6
+status: stable
+description: Detects when MFA is disabled for an Azure AD user account
+references:
+  - https://attack.mitre.org/techniques/T1556/006/
+author: Cloud Identity
+date: 2023-11-05
+tags:
+  - attack.defense_evasion
+  - attack.t1556.006
+  - attack.persistence
+  - attack.t1098
+logsource:
+  product: azure
+  service: auditlogs
+detection:
+  selection:
+    operationName: 'Disable Strong Authentication'
+    result: success
+  condition: selection
+falsepositives:
+  - Authorized MFA policy changes
+level: high

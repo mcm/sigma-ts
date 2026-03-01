@@ -1,0 +1,25 @@
+title: Potential DGA Domain Query
+id: b1de9f7a-4c6b-6b7d-fc5e-e9f4a5b6c7d8
+status: experimental
+description: Detects DNS queries to domains matching DGA-like patterns (long random-looking names)
+author: DNS Monitor
+date: 2024-05-01
+tags:
+  - attack.command_and_control
+  - attack.t1568.002
+logsource:
+  category: dns
+detection:
+  selection:
+    QueryName|contains:
+      - '.xyz'
+      - '.top'
+      - '.click'
+  filter_legit:
+    QueryName|contains:
+      - 'amazonaws.com'
+      - 'cloudfront.net'
+  condition: selection and not filter_legit
+falsepositives:
+  - Some legitimate services use uncommon TLDs
+level: low

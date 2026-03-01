@@ -1,0 +1,27 @@
+title: Persistence via Run Registry Key
+id: f3bc1d9e-6a8f-8f9b-da7c-c1d6e7f8a9b0
+status: stable
+description: Detects persistence established through Run and RunOnce registry keys
+author: Registry Monitor
+date: 2023-09-15
+tags:
+  - attack.persistence
+  - attack.t1547.001
+logsource:
+  category: registry_set
+  product: windows
+detection:
+  selection:
+    TargetObject|startswith:
+      - 'HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
+      - 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
+      - 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
+      - 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
+  filter_legit:
+    Image|startswith:
+      - 'C:\Program Files\'
+      - 'C:\Program Files (x86)\'
+  condition: selection and not filter_legit
+falsepositives:
+  - Software installation
+level: medium

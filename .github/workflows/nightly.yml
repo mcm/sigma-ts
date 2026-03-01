@@ -1,0 +1,71 @@
+name: Nightly SigmaHQ Corpus Validation
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # daily at 02:00 UTC
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      error_threshold:
+        description: 'Max allowed parse errors (default: 50)'
+        required: false
+        default: '50'
+
+jobs:
+  sigmahq-corpus:
+    name: Validate Full SigmaHQ Rule Set
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install sigma-ts dependencies
+        run: npm ci
+
+      - name: Checkout SigmaHQ/sigma community rules
+        uses: actions/checkout@v4
+        with:
+          repository: SigmaHQ/sigma
+          path: sigma-hq-rules
+          sparse-checkout: |
+            rules
+            rules-deprecated
+            rules-emerging-threats
+          sparse-checkout-cone-mode: false
+
+      - name: Run corpus validation
+        id: validate
+        run: |
+          node --input-type=module <<'EOF'
+          import { loadRulesFromDirectory } from './src/node/collection-loader.js'
+
+          const CORPUS_DIR = './sigma-hq-rules/rules'
+          const ERROR_THRESHOLD = parseInt(process.env.ERROR_THRESHOLD || '50', 10)
+
+          console.log(`Loading rules from: ${CORPUS_DIR}`)
+          const collection = await loadRulesFromDirectory(CORPUS_DIR)
+
+          console.log(`Rules loaded: ${collection.count}`)
+          console.log(`Parse errors: ${collection.errorCount}`)
+
+          if (collection.errorCount > 0) {
+            console.log('\nFirst 20 errors:')
+            collection.errors.slice(0, 20).forEach(e => {
+              console.log(`  ${e.source}: ${e.error.message}`)
+            })
+          }
+
+          if (collection.errorCount > ERROR_THRESHOLD) {
+            console.error(`\nFAIL: ${collection.errorCount} errors exceed threshold of ${ERROR_THRESHOLD}`)
+            process.exit(1)
+          }
+
+          console.log(`\nPASS: ${collection.errorCount} errors within threshold of ${ERROR_THRESHOLD}`)
+          EOF
+        env:
+          ERROR_THRESHOLD: ${{ github.event.inputs.error_threshold || '50' }}

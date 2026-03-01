@@ -1,0 +1,24 @@
+title: Pass the Hash Activity
+id: c9ef8a6b-3d5c-5c6e-ad4f-f8a3b4c5d6e7
+status: stable
+description: Detects pass-the-hash activity via Windows Event 4624 with specific logon type
+references:
+  - https://attack.mitre.org/techniques/T1550/002/
+author: Detection Team
+date: 2023-11-20
+tags:
+  - attack.lateral_movement
+  - attack.t1550.002
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4624
+    LogonType: 3
+    LogonProcessName: NtLmSsp
+    WorkstationName|contains: '-'
+  condition: selection
+falsepositives:
+  - Unknown
+level: high

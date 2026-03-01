@@ -1,0 +1,25 @@
+title: Suspicious Svchost Parent Process
+id: a0cd8e6f-3b5a-5a6c-eb4d-d8e3f4a5b6c7
+status: stable
+description: Detects svchost.exe being spawned by an unusual parent process
+author: Process Integrity
+date: 2023-10-10
+tags:
+  - attack.defense_evasion
+  - attack.t1036
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\svchost.exe'
+  filter_legit_parents:
+    ParentImage|endswith:
+      - '\services.exe'
+      - '\MsMpEng.exe'
+      - '\Mrt.exe'
+      - '\rpcnet.exe'
+  condition: selection and not filter_legit_parents
+falsepositives:
+  - Some legitimate software may spawn svchost
+level: high

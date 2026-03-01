@@ -1,0 +1,9 @@
+title: Good Rule
+id: 11111111-1111-1111-1111-111111111111
+status: stable
+logsource:
+  category: process_creation
+detection:
+  selection:
+    CommandLine: test
+  condition: selection

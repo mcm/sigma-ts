@@ -1,0 +1,29 @@
+title: WMI Spawning Process
+id: e4ab2c0d-7f9e-9e0a-cf8b-b2c7d8e9f0a1
+status: test
+description: Detects processes spawned through WMI (Windows Management Instrumentation)
+references:
+  - https://attack.mitre.org/techniques/T1047/
+author: WMI Monitor
+date: 2024-03-15
+tags:
+  - attack.execution
+  - attack.t1047
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    ParentImage|endswith:
+      - '\WmiPrvSE.exe'
+      - '\wmic.exe'
+    Image|endswith:
+      - '\cmd.exe'
+      - '\powershell.exe'
+      - '\cscript.exe'
+      - '\wscript.exe'
+  condition: selection
+falsepositives:
+  - Legitimate WMI-based management solutions
+  - Monitoring software
+level: medium

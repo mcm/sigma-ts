@@ -1,0 +1,27 @@
+title: Suspicious Rundll32 Execution
+id: c4ef2a0b-7d9c-9c0e-ad8f-f2a7b8c9d0e1
+status: test
+description: Detects suspicious uses of rundll32.exe to execute code
+references:
+  - https://attack.mitre.org/techniques/T1218/011/
+author: LOLBin Defense
+date: 2024-02-05
+tags:
+  - attack.defense_evasion
+  - attack.t1218.011
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith: '\rundll32.exe'
+  selection_no_dll:
+    CommandLine|contains:
+      - 'javascript:'
+      - 'shell32.dll,Control_RunDLL'
+      - 'advpack.dll,LaunchINFSection'
+      - 'ieadvpack.dll,LaunchINFSection'
+  condition: selection_image and selection_no_dll
+falsepositives:
+  - Some legitimate software uses these rundll32 calls
+level: medium

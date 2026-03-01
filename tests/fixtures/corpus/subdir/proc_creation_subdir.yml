@@ -1,0 +1,14 @@
+title: Subdirectory Rule
+id: 99887766-5544-3322-1100-aabbccddeeff
+status: test
+description: A rule in a subdirectory for testing recursive loading
+author: Test
+date: 2024-01-01
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    CommandLine|contains: test_subdir
+  condition: selection
+level: low

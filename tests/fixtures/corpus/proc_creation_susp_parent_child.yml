@@ -1,0 +1,32 @@
+title: Suspicious Parent-Child Process Relationship
+id: b7de5f3a-0c2b-2b3d-fc1e-e5f0a1b2c3d4
+status: test
+description: Detects unusual parent-child process relationships often seen in exploitation
+author: Behavioral Detection
+date: 2024-06-15
+tags:
+  - attack.execution
+  - attack.t1059
+  - attack.defense_evasion
+  - attack.t1036.005
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    ParentImage|endswith:
+      - '\excel.exe'
+      - '\word.exe'
+      - '\outlook.exe'
+      - '\winword.exe'
+      - '\powerpnt.exe'
+    Image|endswith:
+      - '\cmd.exe'
+      - '\powershell.exe'
+      - '\cscript.exe'
+      - '\wscript.exe'
+      - '\mshta.exe'
+  condition: selection
+falsepositives:
+  - Legitimate macros in Office documents
+level: high

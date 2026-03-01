@@ -1,0 +1,26 @@
+title: WScript or CScript Executing Script from Suspicious Location
+id: c6ef4a2b-9d1c-1c2e-ad0f-f4a9b0c1d2e3
+status: test
+description: Detects WScript or CScript executing scripts from unusual locations
+author: Script Defense
+date: 2024-01-05
+tags:
+  - attack.execution
+  - attack.t1059.005
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith:
+      - '\wscript.exe'
+      - '\cscript.exe'
+  selection_path:
+    CommandLine|contains:
+      - '\AppData\'
+      - '\Temp\'
+      - '\ProgramData\'
+  condition: selection_image and selection_path
+falsepositives:
+  - Legitimate administrative scripts in non-standard locations
+level: medium

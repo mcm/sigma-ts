@@ -1,0 +1,28 @@
+title: Suspicious Scheduled Task Creation
+id: a2cd0e8f-5b7a-7a8c-eb6d-d0e5f6a7b8c9
+status: test
+description: Detects creation of scheduled tasks via schtasks.exe with suspicious parameters
+author: Persistence Hunter
+date: 2024-05-20
+tags:
+  - attack.persistence
+  - attack.t1053.005
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\schtasks.exe'
+    CommandLine|contains: '/create'
+  selection_susp:
+    CommandLine|contains:
+      - 'powershell'
+      - 'cmd.exe'
+      - 'wscript'
+      - 'cscript'
+      - 'regsvr32'
+      - 'rundll32'
+  condition: selection and selection_susp
+falsepositives:
+  - Legitimate software using scheduled tasks
+level: medium
