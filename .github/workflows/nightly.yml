@@ -27,6 +27,9 @@ jobs:
       - name: Install sigma-ts dependencies
         run: npm ci
 
+      - name: Build sigma-ts
+        run: npm run build
+
       - name: Checkout SigmaHQ/sigma community rules
         uses: actions/checkout@v4
         with:
@@ -42,7 +45,7 @@ jobs:
         id: validate
         run: |
           node --input-type=module <<'EOF'
-          import { loadRulesFromDirectory } from './src/node/collection-loader.js'
+          import { loadRulesFromDirectory } from './dist/node/index.js'
 
           const CORPUS_DIR = './sigma-hq-rules/rules'
           const ERROR_THRESHOLD = parseInt(process.env.ERROR_THRESHOLD || '50', 10)
